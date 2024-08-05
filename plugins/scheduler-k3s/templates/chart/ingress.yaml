@@ -1,0 +1,47 @@
+{{- $processName := "PROCESS_NAME" }}
+{{- $config := index .Values.processes "PROCESS_NAME" }}
+{{- if and $config.web.domains (eq $.Values.global.network.ingress_class "nginx") }}
+{{- range $pdx, $domain := $config.web.domains }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    dokku.com/managed: "true"
+    dokku.com/ingress-method: "domains"
+    {{- if $config.web.tls.enabled }}
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    {{- end }}
+    {{ include "print.annotations" (dict "config" $.Values.global "key" "ingress") | indent 4 }}
+    {{ include "print.annotations" (dict "config" $config "key" "ingress") | indent 4 }}
+  labels:
+    app.kubernetes.io/instance: {{ $.Values.global.app_name }}-{{ $processName }}
+    app.kubernetes.io/name: {{ $processName }}
+    app.kubernetes.io/part-of: {{ $.Values.global.app_name }}
+    {{ include "print.labels" (dict "config" $.Values.global "key" "ingress") | indent 4 }}
+    {{ include "print.labels" (dict "config" $config "key" "ingress") | indent 4 }}
+  name: {{ $.Values.global.app_name }}-{{ $processName }}-{{ $domain.slug }}
+  namespace: {{ $.Values.global.namespace }}
+spec:
+  ingressClassName: nginx
+  {{- if $config.web.tls.enabled }}
+  tls:
+    - hosts:
+      - {{ $domain.name | quote }}
+      secretName: tls-{{ $.Values.global.app_name }}-{{ $processName }}
+  {{- end }}
+  rules:
+    - host: {{ $domain.name | quote }}
+      http:
+        paths:
+          {{- if $config.web.port_maps }}
+          - backend:
+              service:
+                name: {{ $.Values.global.app_name }}-{{ $processName }}
+                port:
+                  name: {{ include "primary.port" $config.web.port_maps }}
+            pathType: ImplementationSpecific
+            path: /
+          {{- end }}
+{{- end }}
+{{- end }}

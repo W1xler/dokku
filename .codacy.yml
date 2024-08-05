@@ -1,0 +1,10 @@
+---
+engines:
+  duplication:
+    exclude_paths:
+      - "*"
+exclude_paths:
+  - vendor/**/*
+  - tests/**/*
+  - "**_test.go"
+  - contrib/*
