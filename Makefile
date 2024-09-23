@@ -190,11 +190,12 @@ docker:
 	grep -i -E "^docker" /etc/group || groupadd docker
 	usermod -aG docker dokku
 ifndef CI
-	#wget -nv -O - https://get.docker.com/ | sh
+	wget -nv -O - https://get.docker.com/ | sh
 ifdef DOCKER_VERSION
 	apt-get -qq -y --no-install-recommends install docker-engine=${DOCKER_VERSION} || (apt-cache madison docker-engine ; exit 1)
 endif
-	sleep 2 # give docker a moment i guess
+	sleep 5 # give docker a moment i guess
+	systemctl restart docker
 endif
 
 stack:
