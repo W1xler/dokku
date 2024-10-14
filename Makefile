@@ -126,7 +126,9 @@ else
 endif
 
 plugin-dependencies: plugn procfile-util
-	sudo -E dokku plugin:install-dependencies --core
+    sudo chown -R dokku:dokku /var/lib/dokku/plugins /var/lib/dokku/core-plugins
+    sudo chmod -R +x /var/lib/dokku/plugins/enabled
+    sudo -E dokku plugin:install-dependencies --core
 
 plugins: plugn procfile-util docker
 	sudo -E dokku plugin:install --core
