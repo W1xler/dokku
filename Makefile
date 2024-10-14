@@ -130,6 +130,7 @@ plugin-dependencies: plugn procfile-util
     sudo chmod -R +x /var/lib/dokku/plugins/enabled
     sudo -E dokku plugin:install-dependencies --core
 
+
 plugins: plugn procfile-util docker
 	sudo -E dokku plugin:install --core
 
